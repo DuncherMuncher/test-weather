@@ -18,6 +18,14 @@ As with most of these sorts of exercises I'm happy with it for the most part as 
 
 ## How To Run It ##
 
+- Download the repo
+- From the command line cd into the src directory
+- Run `pip install --user pipenv`
+- Run `pipenv install requests`
+- Run `pipenv run python ./weathergenerator.py`
+- Run `pipenv run python ./weathergenerator.py -r h -sd 2018-01-01 -ed 2018-08-15` hourly resolution between those two dates (sd = start date and ed = end date)
+- Run `pipenv run python ./weathergenerator.py -h` for help
+
 ## Known Shortcomings ##
 
 - Accurate seed data. I wish I had more time to curate more and more accurate data
