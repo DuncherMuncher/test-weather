@@ -17,10 +17,13 @@ maximum_dist = 31
 mult_dist = [0]*maximum_dist
 locations = {}
 
+#######################################
+
 def run():
     st = datetime.now()
+    human_resolution = 'Daily'
 
-    # Get the command line inputs
+    # Get and parse the command line inputs
     parser = argparse.ArgumentParser()
     parser.add_argument('-sd', '--start_date', help='pass the start date for the weather you want to view ("YYYY-MM-DD")', type=lambda d: datetime.strptime(d, '%Y-%m-%d'), default=datetime.now() - timedelta(365/12))
     parser.add_argument('-ed', '--end_date', help='pass the end date for the weather you want to view, will default to today if not supplied ("YYYY-MM-DD")', type=lambda d: datetime.strptime(d, '%Y-%m-%d'), default=datetime.now())
@@ -37,12 +40,16 @@ def run():
         end_date = start_date
         start_date = temp_date
 
-    print('Start_date: {}\nEnd_date: {}\nwith a resolution of {}'.format(start_date, end_date, resolution))
+    human_resolution = ('Hourly' if resolution == 'h' else human_resolution)
+    human_resolution = ('Monthly' if resolution == 'm' else human_resolution)
+
+    print('Start_date: {}\nEnd_date: {}\nwith a resolution of {}'.format(start_date, end_date, human_resolution))
 
     # Loop through the dates and locations and write each line to disk
     sample_size = 10
     i = 0
     print ('Sample data for the following locations: \n\t{}'.format('\n\t'.join(locations)))
+    
     fname = 'output-{}.txt'.format(datetime.now().strftime('%Y%m%d%H%M'))
     with file(fname, 'w') as f:
         for single_date in daterange(start_date, end_date, resolution):
@@ -56,6 +63,8 @@ def run():
     et = datetime.now()
     rd = relativedelta.relativedelta (et, st)
     print ('Finished, test data written to {} in {}.{} seconds'.format(fname, rd.seconds, rd.microseconds))
+
+#######################################
 
 def get_line_item(loc, date):
     #step 0 - get the month from the date
@@ -81,6 +90,8 @@ def get_line_item(loc, date):
         'pressure':pressure,
         'conditions':conditions
     }
+
+#######################################
 
 # TODO: add tests
 def get_conditions(temp, humidity, pressure, rainy_days, sunny_days, cloudy_days, other_days):
@@ -114,6 +125,8 @@ def get_conditions(temp, humidity, pressure, rainy_days, sunny_days, cloudy_days
     else:
         return random.choice(['Late Thunder', 'Possible Thuderstorms', 'Isolated Showers', 'Early Fog', 'Windy'])
 
+#######################################
+
 # TODO: add tests
 def daterange(start_date, end_date, resolution):
     if resolution == 'd':
@@ -126,10 +139,14 @@ def daterange(start_date, end_date, resolution):
         for n in range(int ((end_date - start_date).days)*24):
             yield start_date + timedelta(hours=n)
 
+#######################################
+
 def get_locations_from_disk():
     global locations
     with file('locations.json', 'r') as f:
         locations = json.load(f)
+
+#######################################
 
 # TODO: add tests
 # return a random number which given enough calls will approximate a bell curve
@@ -141,6 +158,8 @@ def get_distributed_number():
 
     mult_dist[sum(vals)]
     return sum(vals)
+
+#######################################
 
 # TODO: add tests
 # get a random number given boundaries and an average that will over time tend towards a bell curve of results
@@ -162,64 +181,8 @@ def get_num_within_range(high, avg, low):
 
     return temp
 
-# def do_work():
-#     total_vals = [0]*maximum_dist
-#     for x in range(1000000):
-#         total_vals[get_distributed_number()] += 1
-
-#     for x in range(len(total_vals)):
-#         print '{} -\t{}'.format(x+1, 'x' * (total_vals[x]/1000))
-
-#     for x in range(len(total_vals)):
-#         print '{} -\t{}'.format(x+1, total_vals[x])
-
-# def do_sydney():
-#     global mult_dist
-#     temps = get_temp_ranges(locations['Sydney']['January'])
-
-#     bucket_range = int(round(temps['MaxTemp']) - round(temps['MinTemp'])) + 1
-#     min_temp = int(round(temps['MinTemp']))
-
-#     avg_temp = int(round(temps['AvgTemp']))
-
-#     print 'BucketRange: {}'.format(bucket_range)
-
-#     print 'Min: {}  Avg: {} Max: {}'.format(temps['MinTemp'], temps['AvgTemp'], temps['MaxTemp'])
-
-#     total_vals = [0]*bucket_range
-
-#     print 'len(total_vals): {}'.format(len(total_vals))
-
-#     raw_temps = []
-
-#     for x in range(1000000):
-#         temp = get_num_within_range(temps['MaxTemp'], temps['AvgTemp'], temps['MinTemp'])
-#         raw_temps.append(temp)
-#         if x < 10:
-#             print temp
-#         try:
-#             total_vals[int(round(temp)) - min_temp] += 1
-#         except Exception as e:
-#             print 'INDEX OUT OF RANGE: {} - {}'.format(temp, int(round(temp)))
-
-#     for x in range(len(total_vals)):
-#         print '{} - {}'.format(x+min_temp, 'x' * (total_vals[x]/1000))
-
-#     for x in range(len(total_vals)):
-#         print '{} - {}'.format(x+min_temp, total_vals[x])
-        
-#     # for x in range(len(mult_dist)):
-#     #     print '{} - {}'.format(x, 'x' * (mult_dist[x]/100))
-
-#     # for x in range(len(mult_dist)):
-#     #     print '{} - {}'.format(x, mult_dist[x])
-
-#     print 'Avg: {}'.format(sum(raw_temps) / len(raw_temps))
+#######################################
 
 get_locations_from_disk()
-
-# do_work()
-
-# do_sydney()
 
 run()
